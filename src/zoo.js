@@ -16,17 +16,17 @@ function animalsByIds(...ids) {
 
   if (!ids) return []
 
-  if (ids.length > 1) {
+  if (ids.length) {
     let animals = [];
 
     ids.forEach((idAnimal) => {
-      animals.push(data.animals.find(value => value.id == idAnimal));
+      animals.push(data.animals.find(animal => animal.id == idAnimal));
     });
 
     return animals;
   }
 
-  return data.animals.filter(value => value.id == ids);
+  return data.animals.filter(animal => animal.id == ids);
 
 }
 
@@ -46,20 +46,11 @@ function animalsOlderThan(animal, age) {
 
 function employeeByName(employeeName) {
 
-  if (employeeName) {
+  if (!employeeName) return {};
 
-    let employeeFirstName = data.employees.filter(value => value.firstName == employeeName);
+  const employee = data.employees.find(employee => employee.firstName == employeeName || employee.lastName == employeeName);
 
-    let employeeLastName = data.employees.filter(value => value.lastName == employeeName);
-
-    if (employeeFirstName[0] !== undefined) {
-      return employeeFirstName[0];
-    }
-    return employeeLastName[0];
-  } else {
-    return {};
-  }
-
+  return employee;
 }
 
 function createEmployee(personalInfo, associatedWith) {
@@ -73,7 +64,6 @@ function createEmployee(personalInfo, associatedWith) {
   }
 
   return employee;
-
 }
 
 function isManager(id) {
@@ -81,11 +71,11 @@ function isManager(id) {
   let isManagerFlag = false;
 
   data.employees.forEach((employee) => {
-    let result = false;
+    let idOfManager = false;
 
-    result = employee.managers.some(idManager => idManager === id);
+    idOfManager = employee.managers.some(idManager => idManager === id);
 
-    if (result) isManagerFlag = true;
+    if (idOfManager) isManagerFlag = true;
   });
 
   if (isManagerFlag) return true;
@@ -96,14 +86,15 @@ function isManager(id) {
 function addEmployee(id, firstName, lastName, managers, responsibleFor) {
 
   if (managers === undefined) managers = [];
+
   if (responsibleFor === undefined) responsibleFor = [];
 
   const employee = {
-    id: id,
-    firstName: firstName,
-    lastName: lastName,
-    managers: managers,
-    responsibleFor: responsibleFor
+    id,
+    firstName,
+    lastName,
+    managers,
+    responsibleFor,
   }
   data.employees.push(employee);
   }
@@ -157,7 +148,7 @@ function entryCalculator(entrants) {
     return payableAmount;
   }
 
-  if (!!entrants) return 0;
+  if (!entrants) return 0;
 
   if (entrants === undefined) return 0;
 
@@ -260,19 +251,23 @@ function animalMap(options) {
   }
 
   if (options.includeNames && options.sex && options.sorted) {
+
     return animalsByLocation(options.sorted, options.sex);
   }
 
   if (options.includeNames && options.sorted) {
+
     return animalsByLocation(options.sorted);
   }
 
   if (options.includeNames && options.sex) {
     const noSort = false;
+
     return animalsByLocation(noSort, options.sex);
   }
 
   if (options.includeNames) {
+
     return animalsByLocation();
   }
 
