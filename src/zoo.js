@@ -322,16 +322,16 @@ function oldestFromFirstSpecies(id) {
 
 function increasePrices(percentage) {
 
-  let priceAdult = Math.round((data.prices.Adult+(data.prices.Adult*percentage/100) + Number.EPSILON) * 100) / 100;
-  let priceChild = Math.round((data.prices.Child+(data.prices.Child*percentage/100) + Number.EPSILON) * 100) / 100;
-  let priceSenior = Math.round((data.prices.Senior+(data.prices.Senior*percentage/100) + Number.EPSILON) * 100) / 100;
+  let priceAdult = Math.round((data.prices.Adult+(data.prices.Adult*percentage/100)) * 100) / 100;
+  let priceChild = Math.round((data.prices.Child+(data.prices.Child*percentage/100)) * 100) / 100;
+  let priceSenior = Math.round((data.prices.Senior+(data.prices.Senior*percentage/100)) * 100) / 100;
 
 
-  data.prices.Adult = Math.round((priceAdult + Number.EPSILON) * 100) / 100
+  data.prices.Adult = Math.round((priceAdult) * 100) / 100
 
-  data.prices.Child = Math.round((priceChild + Number.EPSILON) * 100) / 100
+  data.prices.Child = Math.round((priceChild) * 100) / 100
 
-  data.prices.Senior = Math.round((priceSenior + Number.EPSILON) * 100) / 100
+  data.prices.Senior = Math.round((priceSenior) * 100) / 100
 
 
 }
@@ -344,8 +344,8 @@ function employeeCoverage(idOrName) {
 
     data.employees.forEach((employee) => {
       employee.responsibleFor.forEach((idAnimal) => {
-        let animalFinded = data.animals.find(animal => animal.id === idAnimal);
-        animalsList.push(animalFinded.name);
+        let animalFound = data.animals.find(animal => animal.id === idAnimal);
+        animalsList.push(animalFound.name);
       });
 
       allAnimalsResponse[`${employee.firstName} ${employee.lastName}`] = animalsList;
