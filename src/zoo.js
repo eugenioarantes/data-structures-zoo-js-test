@@ -75,7 +75,7 @@ function isManager(id) {
 
     idOfManager = employee.managers.some(idManager => idManager === id);
 
-    if (idOfManager) isManagerFlag = true;
+    if (idOfManager) return isManagerFlag = true;
   });
 
   if (isManagerFlag) return true;
@@ -89,14 +89,20 @@ function addEmployee(id, firstName, lastName, managers, responsibleFor) {
 
   if (responsibleFor === undefined) responsibleFor = [];
 
-  const employee = {
+  const personalInfo = {
     id,
     firstName,
     lastName,
+  }
+
+  const associatedWith = {
     managers,
     responsibleFor,
   }
-  data.employees.push(employee);
+
+  const employee = createEmployee(personalInfo, associatedWith);
+
+  return data.employees.push(employee);
   }
 
 function animalCount(species) {
@@ -118,39 +124,37 @@ function animalCount(species) {
 
 function entryCalculator(entrants) {
 
-  if (entrants) {
-    const ageGroupIndex = 0;
-    const quantityOfPeoplesIndex = 1;
-    let price;
-    let prices = [];
-
-    const entrantValues = Object.entries(entrants);
-
-    entrantValues.forEach(element => {
-
-    if (element[ageGroupIndex] === 'Adult') {
-      price = data.prices.Adult;
-      prices.push(element[quantityOfPeoplesIndex] * price);
-
-    } else if (element[ageGroupIndex] === 'Child') {
-      price = data.prices.Child;
-      prices.push(element[quantityOfPeoplesIndex] * price);
-
-    } else if (element[ageGroupIndex] === 'Senior') {
-      price = data.prices.Senior;
-      prices.push(element[quantityOfPeoplesIndex] * price);
-
-    }
-    });
-
-    const payableAmount = prices.reduce((accumulator, prices) => accumulator + prices, 0);
-
-    return payableAmount;
-  }
-
   if (!entrants) return 0;
 
   if (entrants === undefined) return 0;
+
+  const ageGroupIndex = 0;
+  const quantityOfPeoplesIndex = 1;
+  let price;
+  let prices = [];
+
+  const entrantValues = Object.entries(entrants);
+
+  entrantValues.forEach(element => {
+
+  if (element[ageGroupIndex] === 'Adult') {
+    price = data.prices.Adult;
+    prices.push(element[quantityOfPeoplesIndex] * price);
+
+  } else if (element[ageGroupIndex] === 'Child') {
+    price = data.prices.Child;
+    prices.push(element[quantityOfPeoplesIndex] * price);
+
+  } else if (element[ageGroupIndex] === 'Senior') {
+    price = data.prices.Senior;
+    prices.push(element[quantityOfPeoplesIndex] * price);
+
+  }
+  });
+
+  const payableAmount = prices.reduce((accumulator, prices) => accumulator + prices, 0);
+
+  return payableAmount;
 
 }
 
