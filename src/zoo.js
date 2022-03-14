@@ -1,11 +1,11 @@
 /*
 eslint no-unused-vars: [
-  "error",
-  {
-    "args": "none",
-    "vars": "local",
-    "varsIgnorePattern": "data"
-  }
+"error",
+{
+"args": "none",
+"vars": "local",
+"varsIgnorePattern": "data"
+}
 ]
 */
 
@@ -13,164 +13,81 @@ const { prices } = require('./data');
 const data = require('./data');
 
 function animalsByIds(...ids) {
+  const animals = ids.map(id => {
 
-  if (!ids) return []
+    return data.animals.find(idAnimal => idAnimal.id === id);
+  })
 
-  if (ids.length) {
-    let animals = [];
-
-    ids.forEach((idAnimal) => {
-      animals.push(data.animals.find(animal => animal.id == idAnimal));
-    });
-
-    return animals;
-  }
-
-  return data.animals.filter(animal => animal.id == ids);
-
+  return animals;
 }
 
 function animalsOlderThan(animal, age) {
+  const animals = data.animals.find(({ name }) => name === animal);
 
- const animals = data.animals.find(animalFilter => animalFilter.name === animal);
-
- let ages = [];
-
- animals.residents.forEach((resident) => {
-  ages.push(resident.age);
- });
-
- return ages.every(ageTest => ageTest > age);
-
+  return animals.residents.every(resident => resident.age >= age);
 }
 
 function employeeByName(employeeName) {
-
   if (!employeeName) return {};
-
   const employee = data.employees.find(employee => employee.firstName == employeeName || employee.lastName == employeeName);
 
   return employee;
 }
 
 function createEmployee(personalInfo, associatedWith) {
-
   const employee = {
-    id: personalInfo.id,
-    firstName: personalInfo.firstName,
-    lastName: personalInfo.lastName,
-    managers: associatedWith.managers,
-    responsibleFor: associatedWith.responsibleFor
+    ...personalInfo,
+    ...associatedWith
   }
 
   return employee;
 }
 
 function isManager(id) {
-
-  let isManagerFlag = false;
-
-  data.employees.forEach((employee) => {
-    let idOfManager = false;
-
-    idOfManager = employee.managers.some(idManager => idManager === id);
-
-    if (idOfManager) return isManagerFlag = true;
-  });
-
-  if (isManagerFlag) return true;
-
-  return false;
+  return data.employees.some(({ managers }) => managers.some(idManager => idManager === id));
 }
 
-function addEmployee(id, firstName, lastName, managers, responsibleFor) {
-
-  if (managers === undefined) managers = [];
-
-  if (responsibleFor === undefined) responsibleFor = [];
-
-  const personalInfo = {
-    id,
-    firstName,
-    lastName,
-  }
-
-  const associatedWith = {
-    managers,
-    responsibleFor,
-  }
+function addEmployee(id, firstName, lastName, managers = [], responsibleFor = []) {
+  const personalInfo = { id, firstName, lastName };
+  const associatedWith = { managers, responsibleFor, }
 
   const employee = createEmployee(personalInfo, associatedWith);
 
   return data.employees.push(employee);
-  }
+}
 
-function animalCount(species) {
-  if (!species) {
-    let allSpeciesCount = {}
+function animalCount(specie) {
+  if (!specie) return Object.fromEntries(data.animals.map(({ name, residents }) => [name, residents.length]));
 
-    data.animals.forEach((animal) => {
-      allSpeciesCount[animal.name] = animal.residents.length;
-    });
+  const {residents} = data.animals.find(({ name }) => name === specie);
 
-    return allSpeciesCount;
-  }
-
-  const animal = data.animals.find(animal => animal.name === species);
-  const quantityOfAnimalsOfSpecie = animal.residents.length;
-
-  return quantityOfAnimalsOfSpecie;
+  return residents.length;
 }
 
 function entryCalculator(entrants) {
-
   if (!entrants) return 0;
 
   if (entrants === undefined) return 0;
 
-  const ageGroupIndex = 0;
-  const quantityOfPeoplesIndex = 1;
-  let price;
-  let prices = [];
+  const totalPrice = Object.entries(entrants).reduce((acc, [category, quantity]) => {
+    return acc += quantity * data.prices[category];
+  }, 0);
 
-  const entrantValues = Object.entries(entrants);
-
-  entrantValues.forEach(element => {
-
-  if (element[ageGroupIndex] === 'Adult') {
-    price = data.prices.Adult;
-    prices.push(element[quantityOfPeoplesIndex] * price);
-
-  } else if (element[ageGroupIndex] === 'Child') {
-    price = data.prices.Child;
-    prices.push(element[quantityOfPeoplesIndex] * price);
-
-  } else if (element[ageGroupIndex] === 'Senior') {
-    price = data.prices.Senior;
-    prices.push(element[quantityOfPeoplesIndex] * price);
-
-  }
-  });
-
-  const payableAmount = prices.reduce((accumulator, prices) => accumulator + prices, 0);
-
-  return payableAmount;
-
+  return totalPrice;
 }
 
-function getAnimalsNameByLocation (animal, sort, sex) {
-
+function getAnimalsNameByLocation(animal, sort, sex) {
   let nameAnimalsResponse = {};
   let nameAnimals = [];
   let nameAnimalsSex = [];
 
   animal.residents.forEach(resident => {
-    if(resident.sex === sex) {
-      nameAnimalsSex.push(resident.name);
-    }else {
-     nameAnimals.push(resident.name);
-    }
+    if (resident.sex === sex) {
 
+      nameAnimalsSex.push(resident.name);
+    } else {
+      nameAnimals.push(resident.name);
+    }
   });
 
   if ((sort) && (sex)) {
@@ -189,41 +106,37 @@ function getAnimalsNameByLocation (animal, sort, sex) {
 }
 
 function animalsByLocation(sort, sex) {
-
   let namesAnimalsResponse = {};
-
   let animalsNE = [];
   let animalsNW = [];
   let animalsSE = [];
   let animalsSW = [];
 
-    data.animals.forEach(animal => {
-      if (animal.location === 'NE') {
-        namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-        animalsNE.push(namesAnimalsResponse);
-
-      } else if (animal.location === 'NW') {
-        namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-        animalsNW.push(namesAnimalsResponse);
-
-      } else if (animal.location === 'SE') {
-        namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-        animalsSE.push(namesAnimalsResponse);
-
-      } else if (animal.location === 'SW') {
-        namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-        animalsSW.push(namesAnimalsResponse);
-
-      }
-    });
-
-    let locationResponseWithNames = {
-      NE: animalsNE,
-      NW: animalsNW,
-      SE: animalsSE,
-      SW: animalsSW
+  data.animals.forEach(animal => {
+    if (animal.location === 'NE') {
+      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
+      animalsNE.push(namesAnimalsResponse);
+    } else if (animal.location === 'NW') {
+      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
+      animalsNW.push(namesAnimalsResponse);
+    } else if (animal.location === 'SE') {
+      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
+      animalsSE.push(namesAnimalsResponse);
+    } else if (animal.location === 'SW') {
+      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
+      animalsSW.push(namesAnimalsResponse);
     }
-    return locationResponseWithNames;
+  });
+
+  let locationResponseWithNames = {
+    NE: animalsNE,
+    NW: animalsNW,
+
+    SE: animalsSE,
+    SW: animalsSW
+  }
+
+  return locationResponseWithNames;
 }
 
 function animalMap(options) {
@@ -251,6 +164,7 @@ function animalMap(options) {
       SE: animalsWithLocationSE,
       SW: animalsWithLocationSW
     }
+
     return locationResponse;
   }
 
@@ -258,18 +172,15 @@ function animalMap(options) {
 
     return animalsByLocation(options.sorted, options.sex);
   }
-
   if (options.includeNames && options.sorted) {
 
     return animalsByLocation(options.sorted);
   }
-
   if (options.includeNames && options.sex) {
     const noSort = false;
 
     return animalsByLocation(noSort, options.sex);
   }
-
   if (options.includeNames) {
 
     return animalsByLocation();
@@ -288,93 +199,83 @@ const scheduleOfWeek = {
 }
 
 function schedule(dayName) {
-
   if (!dayName) return scheduleOfWeek;
 
   const situation = scheduleOfWeek[dayName];
 
-  let scheduleResponse = {}
-  scheduleResponse[dayName] = situation;
-
-  return scheduleResponse;
+  return { [dayName]: situation }
 }
 
 function oldestFromFirstSpecies(id) {
-  const employee = data.employees.find(employee => employee.id === id);
 
+  const employee = data.employees.find(employee => employee.id === id);
   const firstAnimal = 0;
+
   let idAnimal = '';
 
   idAnimal = employee.responsibleFor[firstAnimal];
 
   const animals = data.animals.find(animal => animal.id === idAnimal);
 
-  let ageAccumulator = 0;
-  let oldestAnimal = [];
+  const { name, sex, age } = animals.residents.reduce((older, animal) => {
 
-  animals.residents.forEach((resident) => {
-    if (resident.age > ageAccumulator){
-      ageAccumulator = resident.age;
-
-      oldestAnimal = [];
-      oldestAnimal.push(resident.name, resident.sex, resident.age);
-    }
+    return animal.age > older.age ? animal : older;
   });
 
-  return oldestAnimal;
+  return [name, sex, age];
 }
 
 function increasePrices(percentage) {
 
-  let priceAdult = Math.round((data.prices.Adult+(data.prices.Adult*percentage/100)) * 100) / 100;
-  let priceChild = Math.round((data.prices.Child+(data.prices.Child*percentage/100)) * 100) / 100;
-  let priceSenior = Math.round((data.prices.Senior+(data.prices.Senior*percentage/100)) * 100) / 100;
+  const prices = Object.entries(data.prices).reduce((acc, [category, price]) => ({
+    ...acc,
+    [category]: Math.round((price + (price * percentage / 100)) * 100) / 100
+  }), {});
 
-
-  data.prices.Adult = Math.round((priceAdult) * 100) / 100
-
-  data.prices.Child = Math.round((priceChild) * 100) / 100
-
-  data.prices.Senior = Math.round((priceSenior) * 100) / 100
-
-
+  return data.prices = prices;
 }
 
 function employeeCoverage(idOrName) {
 
   if (!idOrName) {
-    let animalsList = [];
-    let allAnimalsResponse = {}
+    const employees = data.employees.map(employee => {
 
-    data.employees.forEach((employee) => {
-      employee.responsibleFor.forEach((idAnimal) => {
-        let animalFound = data.animals.find(animal => animal.id === idAnimal);
-        animalsList.push(animalFound.name);
-      });
-
-      allAnimalsResponse[`${employee.firstName} ${employee.lastName}`] = animalsList;
-      animalsList = [];
+      return [`${employee.firstName} ${employee.lastName}`, employee.responsibleFor];
     });
 
-    return allAnimalsResponse;
-    }
+    const employeesWithYoursAnimals = employees.map(([employeeName, idsOfResponsible]) => {
+      let species = [];
 
-    let employee = data.employees.find(employee => employee.id === idOrName
-      || employee.firstName === idOrName || employee.lastName === idOrName);
+      for (let id of idsOfResponsible) {
+        const { name: nameOfSpecie } = data.animals.find(animal => animal.id === id);
 
-    let animals = [];
+        species.push(nameOfSpecie);
+      }
 
-    employee.responsibleFor.forEach((idAnimal) => {
-      let animal = data.animals.find(animal => animal.id === idAnimal);
-      animals.push(animal.name);
+      return [employeeName, species];
     });
 
-    let animalsResponse = {}
-    animalsResponse[`${employee.firstName} ${employee.lastName}`] = animals;
+    return Object.fromEntries(employeesWithYoursAnimals);
+  }
 
-    return animalsResponse;
+  let employee = data.employees.find(employee => employee.id === idOrName
+      || employee.firstName === idOrName
+      || employee.lastName === idOrName);
+
+  const animalsIds = [...employee.responsibleFor];
+
+  const animalNames = animalsIds.map(id => {
+    const { name } = data.animals.find(animal => animal.id === id);
+
+    return name;
+  });
+
+  const { firstName, lastName } = employee;
+
+  return {
+    [`${firstName} ${lastName}`]: animalNames
+  }
 }
-
 module.exports = {
   entryCalculator,
   schedule,
