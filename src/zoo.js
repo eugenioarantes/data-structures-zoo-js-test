@@ -13,6 +13,7 @@ const data = require('./data');
 
 const MIDDAY_HOUR = 12;
 const CLOSED_HOUR = 0;
+const LOCATIONS = ['NE', 'NW', 'SE', 'SW'];
 
 function animalsByIds(...ids) {
   const animals = ids.map(id => {
@@ -78,30 +79,27 @@ function entryCalculator(entrants = {}) {
   return totalPrice;
 }
 
-function getAnimalsNameByLocation(animal, sort, sex) {
-  let nameAnimalsResponse = {};
+function getAnimalsNameByLocation({name: specie, residents}, sort, sex) {
+  const nameAnimalsResponse = {};
   let nameAnimals = [];
   let nameAnimalsSex = [];
 
-  animal.residents.forEach(resident => {
-    if (resident.sex === sex) {
+  residents.forEach(({name: animalName, sex: sexResident}) => {
+    if (sex && sex === sexResident) nameAnimalsSex.push(animalName);
 
-      nameAnimalsSex.push(resident.name);
-    } else {
-      nameAnimals.push(resident.name);
-    }
+    else nameAnimals.push(animalName);
   });
 
   if ((sort) && (sex)) {
     const nameAnimalsSexSorted = nameAnimalsSex.sort();
-    nameAnimalsResponse[animal.name] = nameAnimalsSexSorted;
+    nameAnimalsResponse[specie] = nameAnimalsSexSorted;
   } else if (sort) {
     const nameAnimalsSorted = nameAnimals.sort();
-    nameAnimalsResponse[animal.name] = nameAnimalsSorted;
+    nameAnimalsResponse[specie] = nameAnimalsSorted;
   } else if (sex) {
-    nameAnimalsResponse[animal.name] = nameAnimalsSex;
+    nameAnimalsResponse[specie] = nameAnimalsSex;
   } else {
-    nameAnimalsResponse[animal.name] = nameAnimals;
+    nameAnimalsResponse[specie] = nameAnimals;
   }
 
   return nameAnimalsResponse;
@@ -115,25 +113,21 @@ function animalsByLocation(sort, sex) {
   let animalsSW = [];
 
   data.animals.forEach(animal => {
-    if (animal.location === 'NE') {
-      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-      animalsNE.push(namesAnimalsResponse);
-    } else if (animal.location === 'NW') {
-      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-      animalsNW.push(namesAnimalsResponse);
-    } else if (animal.location === 'SE') {
-      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-      animalsSE.push(namesAnimalsResponse);
-    } else if (animal.location === 'SW') {
-      namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
-      animalsSW.push(namesAnimalsResponse);
-    }
+    namesAnimalsResponse = getAnimalsNameByLocation(animal, sort, sex);
+    const {location} = animal;
+
+    if (location === 'NE') animalsNE.push(namesAnimalsResponse);
+
+    else if (location === 'NW') animalsNW.push(namesAnimalsResponse);
+
+    else if (location === 'SE') animalsSE.push(namesAnimalsResponse);
+
+    else if (location === 'SW') animalsSW.push(namesAnimalsResponse);
   });
 
-  let locationResponseWithNames = {
+  const locationResponseWithNames = {
     NE: animalsNE,
     NW: animalsNW,
-
     SE: animalsSE,
     SW: animalsSW
   }
@@ -143,48 +137,42 @@ function animalsByLocation(sort, sex) {
 
 function animalMap(options) {
   if (!options || !options.includeNames) {
-    let animalsWithLocationNE = [];
-    let animalsWithLocationNW = [];
-    let animalsWithLocationSE = [];
-    let animalsWithLocationSW = [];
+   let animalsWithLocationNE = [];
+   let animalsWithLocationNW = [];
+   let animalsWithLocationSE = [];
+   let animalsWithLocationSW = [];
 
-    data.animals.forEach(animal => {
-      if (animal.location === 'NE') {
-        animalsWithLocationNE.push(animal.name);
-      } else if (animal.location === 'NW') {
-        animalsWithLocationNW.push(animal.name);
-      } else if (animal.location === 'SE') {
-        animalsWithLocationSE.push(animal.name);
-      } else if (animal.location === 'SW') {
-        animalsWithLocationSW.push(animal.name);
-      }
-    });
+   data.animals.forEach(({name: specie, location}) => {
+     if (location === 'NE') animalsWithLocationNE.push(specie);
 
-    let locationResponse = {
-      NE: animalsWithLocationNE,
-      NW: animalsWithLocationNW,
-      SE: animalsWithLocationSE,
-      SW: animalsWithLocationSW
-    }
+     else if (location === 'NW') animalsWithLocationNW.push(specie);
 
-    return locationResponse;
+     else if (location === 'SE') animalsWithLocationSE.push(specie);
+
+     else if (location === 'SW') animalsWithLocationSW.push(specie);
+   });
+
+   const locationResponse = {
+     NE: animalsWithLocationNE,
+     NW: animalsWithLocationNW,
+     SE: animalsWithLocationSE,
+     SW: animalsWithLocationSW
+   }
+
+     return locationResponse;
   }
 
   if (options.includeNames && options.sex && options.sorted) {
-
     return animalsByLocation(options.sorted, options.sex);
   }
   if (options.includeNames && options.sorted) {
-
     return animalsByLocation(options.sorted);
   }
   if (options.includeNames && options.sex) {
     const noSort = false;
-
     return animalsByLocation(noSort, options.sex);
   }
   if (options.includeNames) {
-
     return animalsByLocation();
   }
 
